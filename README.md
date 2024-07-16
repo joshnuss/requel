@@ -15,7 +15,9 @@ export default defineConfig({
 })
 ```
 
-Then create an `.sql` file, for example `db/products.sql`
+Then create an `.sql` file, for example `db/products.sql`.
+
+Note: input params can be typed via frontmatter
 
 ```sql
 ---
