@@ -1,5 +1,5 @@
 {
-  "name": "cli",
+  "name": "requel",
   "version": "1.0.0-alpha.0",
   "description": "CLI for requel",
   "type": "module",
