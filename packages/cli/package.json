@@ -1,0 +1,15 @@
+{
+  "name": "cli",
+  "version": "1.0.0-alpha.0",
+  "description": "CLI for requel",
+  "type": "module",
+  "main": "src/bin.js",
+  "bin": "src/bin.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "sade": "^1.8.1"
+  }
+}

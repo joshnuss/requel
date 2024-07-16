@@ -1,10 +1,10 @@
 # Requel
 
-Import `.sql` files with Vite. TypeScript compatible.
+Type-safe `.sql` files with Vite.
 
 ## Example
 
-Add the plugin in `vite.config.ts`
+1. Add the plugin in `vite.config.ts`
 
 ```ts
 import { defineConfig } from 'vite'
@@ -15,9 +15,23 @@ export default defineConfig({
 })
 ```
 
-Then create an `.sql` file, for example `db/products.sql`.
+2. Add `DATABASE_URL` to the `.env` file
 
-Note: input params can be typed via frontmatter
+3. Initialize the repo:
+
+```bash
+pnpx requel init
+```
+
+4. Pull the database schema:
+
+```bash
+pnpx requel db pull
+```
+
+5. Create a `.sql` file, for example `db/products.sql`.
+
+**Note**: input params can be typed via front matter
 
 ```sql
 ---
@@ -27,12 +41,12 @@ select * from products
 where price > :minPrice
 ```
 
-Then import the `.sql` file.
+6. Import the `.sql` file.
 
 ```ts
 import { query } from '$db/products.sql'
 
-// input params and output rows are typed
+// input params and output rows are full typed
 const rows = await query({ minPrice: 100 })
 ```
 
