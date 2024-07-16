@@ -25,11 +25,12 @@ select * from products
 where price > :minPrice
 ```
 
-Then import that file
+Then import the `.sql` file.
 
 ```ts
 import { query } from '$db/products.sql'
 
+// input params and output rows are typed
 const rows = await query({ minPrice: 100 })
 ```
 
