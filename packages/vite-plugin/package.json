@@ -6,7 +6,8 @@
   "scripts": {
     "prepublish": "build && publint",
     "build": "tsc",
-    "test": "vitest"
+    "test": "vitest",
+    "test:watch": "vitest --watch"
   },
   "keywords": [
     "vite",
@@ -26,5 +27,8 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
+  },
+  "dependencies": {
+    "pgsql-parser": "^13.15.0"
   }
 }
