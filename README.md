@@ -1,32 +1,38 @@
-# Turborepo Svelte starter
+# Requel
 
-This is an official starter Turborepo.
+Import `.sql` files with Vite. TypeScript compatible.
 
-## Using this example
+## Example
 
-Run the following command:
+Add the plugin in `vite.config.ts`
 
-```sh
-npx create-turbo@latest -e with-svelte
+```ts
+import { defineConfig } from 'vite'
+import { requel } from 'requel'
+
+export default defineConfig({
+  plugins: [ requel() ]
+})
 ```
 
-## What's inside?
+Then create an `.sql` file, for example `db/products.sql`
 
-This Turborepo includes the following packages/apps:
+```sql
+---
+minPrice: integer
+---
+select * from products
+where price > :minPrice
+```
 
-### Apps and Packages
+Then import that file
 
-- `docs`: a [svelte-kit](https://kit.svelte.dev/) app
-- `web`: another [svelte-kit](https://kit.svelte.dev/) app
-- `ui`: a stub Svelte component library shared by both `web` and `docs` applications
-- `eslint-config-custom`: `eslint` configurations (includes `eslint-plugin-svelte` and `eslint-config-prettier`)
+```ts
+import { query } from '$db/products.sql'
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+const rows = await query({ minPrice: 100 })
+```
 
-### Utilities
+## License
 
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+MIT
