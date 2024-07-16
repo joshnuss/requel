@@ -8,7 +8,7 @@ Add the plugin in `vite.config.ts`
 
 ```ts
 import { defineConfig } from 'vite'
-import { requel } from 'requel'
+import { requel } from 'vite-plugin-requel'
 
 export default defineConfig({
   plugins: [ requel() ]
