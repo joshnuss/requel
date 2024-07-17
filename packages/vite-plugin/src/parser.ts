@@ -75,14 +75,32 @@ export class Parser {
         const relname = stmt.InsertStmt.relation.relname
 
         this.#requireRelation(relname)
+
+        return {
+          type: 'insert',
+          inputs,
+          outputs: []
+        }
       } else if (stmt.UpdateStmt) {
         const relname = stmt.UpdateStmt.relation.relname
 
         this.#requireRelation(relname)
+
+        return {
+          type: 'update',
+          inputs,
+          outputs: []
+        }
       } else if (stmt.DeleteStmt) {
         const relname = stmt.DeleteStmt.relation.relname
 
         this.#requireRelation(relname)
+
+        return {
+          type: 'delete',
+          inputs,
+          outputs: []
+        }
       }
     }
   }
