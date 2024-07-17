@@ -2,9 +2,9 @@
 
 Type-safe `.sql` files with Vite.
 
-## Example
+## Usage
 
-1. Add the plugin in `vite.config.ts`
+Add the plugin in `vite.config.ts`
 
 ```ts
 import { defineConfig } from 'vite'
@@ -15,21 +15,21 @@ export default defineConfig({
 })
 ```
 
-2. Add `DATABASE_URL` to the `.env` file
+Add `DATABASE_URL` to the `.env` file.
 
-3. Initialize the repo:
+Then, initialize the repo:
 
 ```bash
 pnpx requel init
 ```
 
-4. Pull the database schema:
+Pull the database schema:
 
 ```bash
 pnpx requel db pull
 ```
 
-5. Create a `.sql` file, for example `db/products.sql`.
+Create a `.sql` file, for example `db/products.sql`.
 
 **Note**: input params can be typed via front matter
 
@@ -37,11 +37,13 @@ pnpx requel db pull
 ---
 minPrice: integer
 ---
-select * from products
-where price > :minPrice
+
+select *
+  from products
+  where price > :minPrice
 ```
 
-6. Import the `.sql` file.
+Import the `.sql` file:
 
 ```ts
 import { query } from '$db/products.sql'
