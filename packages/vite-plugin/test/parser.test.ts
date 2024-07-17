@@ -73,8 +73,6 @@ min_price: number
 select * from products where name = :name and price > :min_price
 `)
 
-        console.log(result)
-
         expect(result).toMatchObject({
           type: 'select',
           inputs: [
