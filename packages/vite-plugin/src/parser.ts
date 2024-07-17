@@ -1,16 +1,21 @@
 import * as pg from 'pgsql-parser'
+import { Schema, Field } from './schema'
+import matter from 'gray-matter'
 
-import { Schema } from './schema'
-
-export interface SelectStatement {
-  type: 'select'
+interface RelationField extends Field {
+  name: string
+  relation: string
 }
 
-export interface InsertStatement {
-  type: 'insert'
+interface InputField extends Field {
+  name: string
 }
 
-export type Statement = SelectStatement | InsertStatement
+export interface Statement {
+  type: 'select' | 'insert' | 'upsert' | 'update' | 'delete'
+  inputs: InputField[]
+  outputs: RelationField[]
+}
 
 export class UnknownRelationError extends Error {
   relation: string
@@ -29,9 +34,29 @@ export class Parser {
   }
 
   parse(sql: string): Statement {
-    const statements = pg.parse(sql)
+    let { content, data} = matter(sql)
 
-    statements.forEach((statement) => {
+    const inputs: InputField[] = (content.match(/:(\w+)\b/gm) || []).map((name) => {
+      content = content.replaceAll(name, '?')
+      name = name.replace(/^:/, '')
+
+      if (data[name + '?']) name += '?'
+
+      const nullable = name.endsWith('?')
+      const type = data[name] || 'any'
+      const array = type.endsWith('[]')
+
+      return {
+        name: name.replace('[?]$', ''),
+        type: type.replace(/\[\]$/, ''),
+        array,
+        nullable
+      }
+    })
+
+    const statements = pg.parse(content)
+
+    for (let statement of statements) {
       const { stmt } = statement.RawStmt
 
       if (stmt.SelectStmt) {
@@ -40,6 +65,12 @@ export class Parser {
 
           this.#requireRelation(relname)
         })
+
+        return {
+          type: 'select',
+          inputs,
+          outputs: []
+        }
       } else if (stmt.InsertStmt) {
         const relname = stmt.InsertStmt.relation.relname
 
@@ -53,7 +84,7 @@ export class Parser {
 
         this.#requireRelation(relname)
       }
-    })
+    }
   }
 
   #requireRelation(relation: string) {

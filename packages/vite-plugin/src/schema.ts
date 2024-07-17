@@ -1,9 +1,8 @@
 export interface Field {
-  name: string
-  type: 'string' | 'number' | 'boolean'
+  type: 'string' | 'number' | 'boolean' | 'any'
   nullable?: boolean
   array?: boolean
 }
 
-export type Schema =
-  Record<string, Field[]>
+export type FieldRecord = Record<string, Field>
+export type Schema = Record<string, FieldRecord>
