@@ -1,14 +1,18 @@
 import { ast } from '../src/ast.js'
 
+const options = {
+  dialect: 'postgresql'
+}
+
 describe('ast', () => {
   test('unsuported statement', () => {
     expect(() => {
-      ast('truncate table products', 'postgresql')
+      ast('truncate table products', options)
     }).toThrowError('Unsupported statement `truncate_stmt` `truncate table products`')
   })
   describe('select', () => {
     test('star query', () => {
-      const result = ast('select * from products', 'postgresql')
+      const result = ast('select * from products', options)
 
       expect(result).toMatchObject([{
         type: 'select',
@@ -22,7 +26,7 @@ describe('ast', () => {
     })
 
     test('multiple from', () => {
-      const result = ast('select * from products, categories', 'postgresql')
+      const result = ast('select * from products, categories', options)
 
       expect(result).toMatchObject([{
         type: 'select',
@@ -37,7 +41,7 @@ describe('ast', () => {
     })
 
     test('with from alias', () => {
-      const result = ast('select * from products as prod', 'postgresql')
+      const result = ast('select * from products as prod', options)
 
       expect(result).toMatchObject([{
         type: 'select',
@@ -51,7 +55,7 @@ describe('ast', () => {
     })
 
     test('with multiple from alias', () => {
-      const result = ast('select * from products as prod, categories as cat', 'postgresql')
+      const result = ast('select * from products as prod, categories as cat', options)
 
       expect(result).toMatchObject([{
         type: 'select',
@@ -66,7 +70,7 @@ describe('ast', () => {
     })
 
     test('with column names', () => {
-      const result = ast('select id, name, price from products', 'postgresql')
+      const result = ast('select id, name, price from products', options)
 
       expect(result).toMatchObject([{
         type: 'select',
@@ -82,7 +86,7 @@ describe('ast', () => {
     })
 
     test('with column aliases', () => {
-      const result = ast('select id, price as amount from products', 'postgresql')
+      const result = ast('select id, price as amount from products', options)
 
       expect(result).toMatchObject([{
         type: 'select',

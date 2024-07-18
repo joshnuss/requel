@@ -19,7 +19,9 @@ interface SelectStatement {
 
 type Statement = SelectStatement
 
-type Dialect = 'sqlite' | 'bigquery' | 'mysql' | 'mariadb' | 'postgresql'
+interface Options {
+  dialect: 'sqlite' | 'bigquery' | 'mysql' | 'mariadb' | 'postgresql'
+}
 
 class UnsupportedCommandError extends Error {
   constructor(type: string, sql: string) {
@@ -27,8 +29,8 @@ class UnsupportedCommandError extends Error {
   }
 }
 
-export const ast = (sql: string, dialect: Dialect) : Statement[] => {
-  const cst = parse(sql, { dialect })
+export const ast = (sql: string, options: Options) : Statement[] => {
+  const cst = parse(sql, options)
 
   return cst.statements.map((statement): Statement => {
     if (statement.type == 'select_stmt') {
