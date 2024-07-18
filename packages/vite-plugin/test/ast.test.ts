@@ -291,3 +291,98 @@ describe('insert', () => {
     }])
   })
 })
+
+describe('update', () => {
+  test('returns nothing', () => {
+    const result = ast('update products set price = 0', options)
+
+    expect(result).toMatchObject([{
+      type: 'update',
+      fields: [],
+      relations: [
+        { name: 'products', alias: null },
+      ]
+    }])
+  })
+
+  test('returns star', () => {
+    const result = ast('update products set price = 0 returning *', options)
+
+    expect(result).toMatchObject([{
+      type: 'update',
+      fields: [
+        {
+          type: 'wildcard',
+          name: '*'
+        }
+      ],
+      relations: [
+        { name: 'products', alias: null },
+      ]
+    }])
+  })
+
+  test('returns field names', () => {
+    const result = ast('update products set price = 0 returning id, name', options)
+
+    expect(result).toMatchObject([{
+      type: 'update',
+      fields: [
+        {
+          type: 'column',
+          name: 'id'
+        },
+        {
+          type: 'column',
+          name: 'name'
+        }
+      ],
+      relations: [
+        { name: 'products', alias: null },
+      ]
+    }])
+  })
+
+  test('returns field alias', () => {
+    const result = ast('update products set price = 0 returning id, price as amount', options)
+
+    expect(result).toMatchObject([{
+      type: 'update',
+      fields: [
+        {
+          type: 'column',
+          name: 'id'
+        },
+        {
+          type: 'column',
+          name: 'price',
+          alias: 'amount'
+        }
+      ],
+      relations: [
+        { name: 'products', alias: null },
+      ]
+    }])
+  })
+
+  test('with from alias', () => {
+    const result = ast('update products as prod set price = 0 returning id, name', options)
+
+    expect(result).toMatchObject([{
+      type: 'update',
+      fields: [
+        {
+          type: 'column',
+          name: 'id'
+        },
+        {
+          type: 'column',
+          name: 'name'
+        }
+      ],
+      relations: [
+        { name: 'products', alias: 'prod' },
+      ]
+    }])
+  })
+})
