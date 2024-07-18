@@ -52,6 +52,13 @@ import { query } from '$db/products.sql'
 const rows = await query({ minPrice: 100 })
 ```
 
+## Related projects
+
+- [Drizzle](https://orm.drizzle.team)
+- [Prisma](https://www.prisma.io)
+- [Kysely](https://kysely.dev)
+- [TypeSQL](https://github.com/wsporto/typesql)
+
 ## License
 
 MIT
