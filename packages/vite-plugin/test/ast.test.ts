@@ -290,6 +290,27 @@ describe('insert', () => {
       ]
     }])
   })
+
+  test('when `on conflict` specified, statement is considered an upsert', () => {
+    const result = ast('insert into products (name, price) values (1, 2) on conflict do nothing returning id, name', options)
+
+    expect(result).toMatchObject([{
+      type: 'upsert',
+      fields: [
+        {
+          type: 'column',
+          name: 'id'
+        },
+        {
+          type: 'column',
+          name: 'name'
+        }
+      ],
+      relations: [
+        { name: 'products' },
+      ]
+    }])
+  })
 })
 
 describe('update', () => {

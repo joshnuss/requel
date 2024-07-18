@@ -13,7 +13,7 @@ interface Relation {
 }
 
 interface Statement {
-  type: 'select' | 'insert' | 'update' | 'delete',
+  type: 'select' | 'insert' | 'update' | 'upsert' | 'delete',
   fields: Field[],
   relations: Relation[]
 }
@@ -170,6 +170,7 @@ const insertAst = (statement: InsertStmt): Statement => {
 
   const insert_clause = statement.clauses.find((clause) => clause.type == 'insert_clause')
   const returning_clause = statement.clauses.find((clause) => clause.type == 'returning_clause')
+  const upsert_clause = statement.clauses.find((clause) => clause.type == 'upsert_clause')
 
   if (insert_clause?.type == 'insert_clause') {
     const { table } = insert_clause
@@ -212,7 +213,7 @@ const insertAst = (statement: InsertStmt): Statement => {
   }
 
   return {
-    type: 'insert',
+    type: upsert_clause ? 'upsert' : 'insert',
     fields,
     relations
   }
