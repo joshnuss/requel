@@ -30,7 +30,6 @@
     }
   },
   "dependencies": {
-    "pgsql-parser": "^13.15.0",
     "sql-parser-cst": "^0.28.0"
   }
 }

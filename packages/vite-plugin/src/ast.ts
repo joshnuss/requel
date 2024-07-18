@@ -29,7 +29,10 @@ class UnsupportedCommandError extends Error {
 }
 
 export const ast = (sql: string, options: Options) : Statement[] => {
-  const cst = parse(sql, options)
+  const cst = parse(sql, {
+    paramTypes: [':name'],
+    ...options
+  })
 
   return cst.statements.map((statement): Statement => {
     if (statement.type == 'select_stmt') {

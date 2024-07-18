@@ -1,9 +1,13 @@
 import { Schema } from '../src/schema'
 import { Parser } from '../src/parser'
 
+const options = {
+  dialect: 'postgresql'
+}
+
 describe('validates relations', () => {
   const schema: Schema = {}
-  const parser = new Parser(schema)
+  const parser = new Parser(schema, options)
 
   test('raises when select table not found', () => {
     expect(() => {
@@ -41,7 +45,7 @@ describe("parses input parameters", () => {
     products: {}
   }
 
-  const parser = new Parser(schema)
+  const parser = new Parser(schema, options)
 
   describe('select', () => {
     test('when no input params, returns empty array', () => {
@@ -84,9 +88,9 @@ select * from products where name = :name and price > :min_price
 
       test('handles arrays', () => {
         const result = parser.parse(`---
-  tags: string[]
-  ---
-  select * from products where :tags = any(tags)`)
+tags: string[]
+---
+select * from products where :tags = any(tags)`)
 
         expect(result).toMatchObject({
           type: 'select',
@@ -98,14 +102,14 @@ select * from products where name = :name and price > :min_price
 
       test('handles nullable', () => {
         const result = parser.parse(`---
-  tag?: string
-  ---
-  select * from products where :tag = any(tags)`)
+tag?: string
+---
+select * from products where :tag = any(tags)`)
 
         expect(result).toMatchObject({
           type: 'select',
           inputs: [
-            { name: 'tags', type: 'string', array: true, nullable: true }
+            { name: 'tag', type: 'string', array: false, nullable: true }
           ]
         })
       })
@@ -141,11 +145,12 @@ price: number
 insert into products values (:name, :price)`)
 
       expect(result).toMatchObject({
-        type: 'select',
+        type: 'insert',
         inputs: [
           { name: 'name', type: 'string', array: false, nullable: false },
-          { name: 'price', type: 'number', array: false, nullable: false }
-        ]
+          { name: 'price', type: 'number', array: false, nullable: false },
+        ],
+        outputs: [],
       })
     })
   })
@@ -181,8 +186,8 @@ update products set price=:price where id=:id`)
       expect(result).toMatchObject({
         type: 'update',
         inputs: [
+          { name: 'price', type: 'number', array: false, nullable: false },
           { name: 'id', type: 'string', array: false, nullable: false },
-          { name: 'price', type: 'number', array: false, nullable: false }
         ]
       })
     })
@@ -219,8 +224,8 @@ delete from products where price=:price and id=:id`)
       expect(result).toMatchObject({
         type: 'delete',
         inputs: [
-          { name: 'id', type: 'string', array: false, nullable: false },
-          { name: 'price', type: 'number', array: false, nullable: false }
+          { name: 'price', type: 'number', array: false, nullable: false },
+          { name: 'id', type: 'string', array: false, nullable: false }
         ]
       })
     })

@@ -1,5 +1,6 @@
-import * as pg from 'pgsql-parser'
-import { Schema, Field } from './schema'
+import { ast } from './ast.js'
+import type { Options } from './ast.ts'
+import { Schema, Field } from './schema.js'
 import matter from 'gray-matter'
 
 interface RelationField extends Field {
@@ -28,16 +29,17 @@ export class UnknownRelationError extends Error {
 
 export class Parser {
   schema: Schema
+  options: Options
 
-  constructor(schema: Schema) {
+  constructor(schema: Schema, options: Options) {
     this.schema = schema
+    this.options = options
   }
 
   parse(sql: string): Statement {
     let { content, data} = matter(sql)
 
     const inputs: InputField[] = (content.match(/:(\w+)\b/gm) || []).map((name) => {
-      content = content.replaceAll(name, '?')
       name = name.replace(/^:/, '')
 
       if (data[name + '?']) name += '?'
@@ -47,60 +49,24 @@ export class Parser {
       const array = type.endsWith('[]')
 
       return {
-        name: name.replace('[?]$', ''),
+        name: name.replace(/[\?]$/, ''),
         type: type.replace(/\[\]$/, ''),
         array,
         nullable
       }
     })
 
-    const statements = pg.parse(content)
+    const statements = ast(content, this.options)
 
     for (let statement of statements) {
-      const { stmt } = statement.RawStmt
+      statement.relations.forEach((relation) => {
+        this.#requireRelation(relation.name)
+      })
 
-      if (stmt.SelectStmt) {
-        stmt.SelectStmt.fromClause.find((from) => {
-          const relname = from.RangeVar.relname
-
-          this.#requireRelation(relname)
-        })
-
-        return {
-          type: 'select',
-          inputs,
-          outputs: []
-        }
-      } else if (stmt.InsertStmt) {
-        const relname = stmt.InsertStmt.relation.relname
-
-        this.#requireRelation(relname)
-
-        return {
-          type: 'insert',
-          inputs,
-          outputs: []
-        }
-      } else if (stmt.UpdateStmt) {
-        const relname = stmt.UpdateStmt.relation.relname
-
-        this.#requireRelation(relname)
-
-        return {
-          type: 'update',
-          inputs,
-          outputs: []
-        }
-      } else if (stmt.DeleteStmt) {
-        const relname = stmt.DeleteStmt.relation.relname
-
-        this.#requireRelation(relname)
-
-        return {
-          type: 'delete',
-          inputs,
-          outputs: []
-        }
+      return {
+        type: statement.type,
+        inputs,
+        outputs: []
       }
     }
   }
