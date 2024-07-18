@@ -1,5 +1,5 @@
 import { parse } from 'sql-parser-cst'
-import type { SelectStmt, DeleteStmt } from 'sql-parser-cst'
+import type { SelectStmt, InsertStmt, DeleteStmt } from 'sql-parser-cst'
 
 interface Field {
   type: 'wildcard' | 'column',
@@ -13,7 +13,7 @@ interface Relation {
 }
 
 interface Statement {
-  type: 'select' | 'delete',
+  type: 'select' | 'insert' | 'delete',
   fields: Field[],
   relations: Relation[]
 }
@@ -34,6 +34,8 @@ export const ast = (sql: string, options: Options) : Statement[] => {
   return cst.statements.map((statement): Statement => {
     if (statement.type == 'select_stmt') {
       return selectAst(statement)
+    } else if (statement.type == 'insert_stmt') {
+      return insertAst(statement)
     } else if (statement.type == 'delete_stmt') {
       return deleteAst(statement)
     }
@@ -155,6 +157,60 @@ const deleteAst = (statement: DeleteStmt): Statement => {
 
   return {
     type: 'delete',
+    fields,
+    relations
+  }
+}
+
+const insertAst = (statement: InsertStmt): Statement => {
+  const fields: Field[] = []
+  const relations: Relation[] = []
+
+  const insert_clause = statement.clauses.find((clause) => clause.type == 'insert_clause')
+  const returning_clause = statement.clauses.find((clause) => clause.type == 'returning_clause')
+
+  if (insert_clause?.type == 'insert_clause') {
+    const { table } = insert_clause
+
+    if (table.type == 'identifier') {
+      relations.push({
+        name: table.name,
+        alias: null
+      })
+    } else if (table.type == 'alias' && table.expr.type == 'identifier') {
+      relations.push({
+        name: table.expr.name,
+        alias: table.alias.name
+      })
+    }
+  }
+
+  if (returning_clause?.type == 'returning_clause' && returning_clause.columns.type == 'list_expr') {
+    returning_clause.columns.items.forEach((column) => {
+      if (column.type == 'all_columns') {
+        fields.push({
+          type: 'wildcard',
+          name: '*',
+          alias: null
+        })
+      } else if (column.type == 'identifier') {
+        fields.push({
+          type: 'column',
+          name: column.name,
+          alias: null
+        })
+      } else if (column.type == 'alias' && column.expr.type == 'identifier') {
+        fields.push({
+          type: 'column',
+          name: column.expr.name,
+          alias: column.alias.name
+        })
+      }
+    })
+  }
+
+  return {
+    type: 'insert',
     fields,
     relations
   }

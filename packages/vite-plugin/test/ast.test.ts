@@ -5,7 +5,7 @@ const options: Options = {
   dialect: 'postgresql'
 }
 
-test('unsuported statement', () => {
+test('unsupported statement', () => {
   expect(() => {
     ast('truncate table products', options)
   }).toThrowError('Unsupported statement `truncate_stmt` `truncate table products`')
@@ -180,6 +180,101 @@ describe('delete', () => {
 
     expect(result).toMatchObject([{
       type: 'delete',
+      fields: [
+        {
+          type: 'column',
+          name: 'id'
+        },
+        {
+          type: 'column',
+          name: 'name'
+        }
+      ],
+      relations: [
+        { name: 'products', alias: 'prod' },
+      ]
+    }])
+  })
+})
+
+describe('insert', () => {
+  test('returns nothing', () => {
+    const result = ast('insert into products (name, price) values (1, 2)', options)
+
+    expect(result).toMatchObject([{
+      type: 'insert',
+      fields: [],
+      relations: [
+        { name: 'products', alias: null },
+      ]
+    }])
+  })
+
+  test('returns star', () => {
+    const result = ast('insert into products (name, price) values (1, 2) returning *', options)
+
+    expect(result).toMatchObject([{
+      type: 'insert',
+      fields: [
+        {
+          type: 'wildcard',
+          name: '*'
+        }
+      ],
+      relations: [
+        { name: 'products', alias: null },
+      ]
+    }])
+  })
+
+  test('returns field names', () => {
+    const result = ast('insert into products (name, price) values (1, 2) returning id, name', options)
+
+    expect(result).toMatchObject([{
+      type: 'insert',
+      fields: [
+        {
+          type: 'column',
+          name: 'id'
+        },
+        {
+          type: 'column',
+          name: 'name'
+        }
+      ],
+      relations: [
+        { name: 'products', alias: null },
+      ]
+    }])
+  })
+
+  test('returns field alias', () => {
+    const result = ast('insert into products (name, price) values (1, 2) returning id, price as amount', options)
+
+    expect(result).toMatchObject([{
+      type: 'insert',
+      fields: [
+        {
+          type: 'column',
+          name: 'id'
+        },
+        {
+          type: 'column',
+          name: 'price',
+          alias: 'amount'
+        }
+      ],
+      relations: [
+        { name: 'products', alias: null },
+      ]
+    }])
+  })
+
+  test('with from alias', () => {
+    const result = ast('insert into products as prod (name, price) values (1, 2) returning id, name', options)
+
+    expect(result).toMatchObject([{
+      type: 'insert',
       fields: [
         {
           type: 'column',
