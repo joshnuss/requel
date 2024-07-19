@@ -84,6 +84,21 @@ describe("parses input parameters", () => {
       })
     })
 
+    test('when output fields specified', () => {
+      const result = parser.parse('select id, name from products where price > :min_price')
+
+      expect(result).toMatchObject({
+        type: 'select',
+        inputs: [
+          { name: 'min_price', type: 'any' }
+        ],
+        outputs: [
+          { name: 'id', type: 'number' },
+          { name: 'name', type: 'string' }
+        ]
+      })
+    })
+
     describe('when input params have frontmatter', () => {
       test('handles basic types', () => {
         const result = parser.parse(`---
@@ -196,6 +211,19 @@ insert into products values (:name, :price)`)
         ]
       })
     })
+
+    test('when returning specific columns', () => {
+      const result = parser.parse('insert into products values ( 1, 2 ) returning id, name')
+
+      expect(result).toMatchObject({
+        type: 'insert',
+        inputs: [],
+        outputs: [
+          { name: 'id', type: 'number' },
+          { name: 'name', type: 'string' }
+        ]
+      })
+    })
   })
 
   describe('update', () => {
@@ -250,6 +278,19 @@ update products set price=:price where id=:id`)
         ]
       })
     })
+
+    test('when returning specific columns', () => {
+      const result = parser.parse('update products set price = 0 returning id, name')
+
+      expect(result).toMatchObject({
+        type: 'update',
+        inputs: [],
+        outputs: [
+          { name: 'id', type: 'number' },
+          { name: 'name', type: 'string' }
+        ]
+      })
+    })
   })
 
   describe('delete', () => {
@@ -294,6 +335,19 @@ delete from products where price=:price and id=:id`)
 
     test('when returning * columns', () => {
       const result = parser.parse('delete from products returning *')
+
+      expect(result).toMatchObject({
+        type: 'delete',
+        inputs: [],
+        outputs: [
+          { name: 'id', type: 'number' },
+          { name: 'name', type: 'string' }
+        ]
+      })
+    })
+
+    test('when returning specific columns', () => {
+      const result = parser.parse('delete from products returning id, name')
 
       expect(result).toMatchObject({
         type: 'delete',

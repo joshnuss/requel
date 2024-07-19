@@ -87,6 +87,16 @@ export class Parser {
             })
 
           })
+        } else if (field.type == 'column') {
+          const relation = statement.relations[0]
+          const table = this.schema[relation.name]
+          const col = table[field.name]
+
+          outputs.push({
+            name: field.name,
+            relation: relation.name,
+            type: col.type
+          })
         }
       })
 
