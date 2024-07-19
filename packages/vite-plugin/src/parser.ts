@@ -65,14 +65,35 @@ export class Parser {
     const statements = ast(content, this.options)
 
     for (let statement of statements) {
+      const outputs: RelationField[] = []
+
       statement.relations.forEach((relation) => {
         this.#requireRelation(relation.name)
+      })
+
+      statement.fields.forEach((field) => {
+        if (field.type == 'wildcard') {
+          statement.relations.forEach((relation) => {
+            const table = this.schema[relation.name]
+
+            Object.keys(table).forEach((name) => {
+              const col = table[name]
+
+              outputs.push({
+                name,
+                relation: relation.name,
+                type: col.type
+              })
+            })
+
+          })
+        }
       })
 
       return {
         type: statement.type,
         inputs,
-        outputs: []
+        outputs
       }
     }
 

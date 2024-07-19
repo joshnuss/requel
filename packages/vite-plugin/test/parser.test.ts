@@ -43,7 +43,14 @@ describe('validates relations', () => {
 
 describe("parses input parameters", () => {
   const schema: Schema = {
-    products: {}
+    products: {
+      id: {
+        type: 'number'
+      },
+      name: {
+        type: 'string'
+      }
+    }
   }
 
   const parser = new Parser(schema, options)
@@ -54,7 +61,11 @@ describe("parses input parameters", () => {
 
       expect(result).toMatchObject({
         type: 'select',
-        inputs: []
+        inputs: [],
+        outputs: [
+          { name: 'id', type: 'number' },
+          { name: 'name', type: 'string' }
+        ]
       })
     })
 
@@ -65,6 +76,10 @@ describe("parses input parameters", () => {
         type: 'select',
         inputs: [
           { name: 'min_price', type: 'any' }
+        ],
+        outputs: [
+          { name: 'id', type: 'number' },
+          { name: 'name', type: 'string' }
         ]
       })
     })
@@ -83,6 +98,10 @@ select * from products where name = :name and price > :min_price
           inputs: [
             { name: 'name', type: 'string', array: false, nullable: false },
             { name: 'min_price', type: 'number', array: false, nullable: false }
+          ],
+          outputs: [
+            { name: 'id', type: 'number' },
+            { name: 'name', type: 'string' }
           ]
         })
       })
@@ -97,6 +116,10 @@ select * from products where :tags = any(tags)`)
           type: 'select',
           inputs: [
             { name: 'tags', type: 'string', array: true , nullable: false }
+          ],
+          outputs: [
+            { name: 'id', type: 'number' },
+            { name: 'name', type: 'string' }
           ]
         })
       })
@@ -111,6 +134,10 @@ select * from products where :tag = any(tags)`)
           type: 'select',
           inputs: [
             { name: 'tag', type: 'string', array: false, nullable: true }
+          ],
+          outputs: [
+            { name: 'id', type: 'number' },
+            { name: 'name', type: 'string' }
           ]
         })
       })
@@ -123,7 +150,8 @@ select * from products where :tag = any(tags)`)
 
       expect(result).toMatchObject({
         type: 'insert',
-        inputs: []
+        inputs: [],
+        outputs: []
       })
     })
 
@@ -134,7 +162,8 @@ select * from products where :tag = any(tags)`)
         type: 'insert',
         inputs: [
           { name: 'price', type: 'any' }
-        ]
+        ],
+        outputs: []
       })
     })
 
@@ -154,6 +183,19 @@ insert into products values (:name, :price)`)
         outputs: [],
       })
     })
+
+    test('when returning * columns', () => {
+      const result = parser.parse('insert into products values ( 1, 2 ) returning *')
+
+      expect(result).toMatchObject({
+        type: 'insert',
+        inputs: [],
+        outputs: [
+          { name: 'id', type: 'number' },
+          { name: 'name', type: 'string' }
+        ]
+      })
+    })
   })
 
   describe('update', () => {
@@ -162,7 +204,8 @@ insert into products values (:name, :price)`)
 
       expect(result).toMatchObject({
         type: 'update',
-        inputs: []
+        inputs: [],
+        outputs: []
       })
     })
 
@@ -173,7 +216,8 @@ insert into products values (:name, :price)`)
         type: 'update',
         inputs: [
           { name: 'price', type: 'any' }
-        ]
+        ],
+        outputs: []
       })
     })
 
@@ -189,6 +233,20 @@ update products set price=:price where id=:id`)
         inputs: [
           { name: 'price', type: 'number', array: false, nullable: false },
           { name: 'id', type: 'string', array: false, nullable: false },
+        ],
+        outputs: []
+      })
+    })
+
+    test('when returning * columns', () => {
+      const result = parser.parse('update products set price = 0 returning *')
+
+      expect(result).toMatchObject({
+        type: 'update',
+        inputs: [],
+        outputs: [
+          { name: 'id', type: 'number' },
+          { name: 'name', type: 'string' }
         ]
       })
     })
@@ -200,7 +258,8 @@ update products set price=:price where id=:id`)
 
       expect(result).toMatchObject({
         type: 'delete',
-        inputs: []
+        inputs: [],
+        outputs: []
       })
     })
 
@@ -211,7 +270,8 @@ update products set price=:price where id=:id`)
         type: 'delete',
         inputs: [
           { name: 'price', type: 'any' }
-        ]
+        ],
+        outputs: []
       })
     })
 
@@ -227,6 +287,20 @@ delete from products where price=:price and id=:id`)
         inputs: [
           { name: 'price', type: 'number', array: false, nullable: false },
           { name: 'id', type: 'string', array: false, nullable: false }
+        ],
+        outputs: []
+      })
+    })
+
+    test('when returning * columns', () => {
+      const result = parser.parse('delete from products returning *')
+
+      expect(result).toMatchObject({
+        type: 'delete',
+        inputs: [],
+        outputs: [
+          { name: 'id', type: 'number' },
+          { name: 'name', type: 'string' }
         ]
       })
     })
