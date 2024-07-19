@@ -43,7 +43,7 @@ export class Parser {
   }
 
   parse(sql: string): Statement {
-    let { content, data} = matter(sql)
+    const { content, data} = matter(sql)
 
     const inputs: InputField[] = (content.match(/:(\w+)\b/gm) || []).map((name) => {
       name = name.replace(/^:/, '')
@@ -55,7 +55,7 @@ export class Parser {
       const array = type.endsWith('[]')
 
       return {
-        name: name.replace(/[\?]$/, ''),
+        name: name.replace(/[?]$/, ''),
         type: type.replace(/\[\]$/, ''),
         array,
         nullable
@@ -64,7 +64,7 @@ export class Parser {
 
     const statements = ast(content, this.options)
 
-    for (let statement of statements) {
+    for (const statement of statements) {
       const outputs: RelationField[] = []
 
       statement.relations.forEach((relation) => {
