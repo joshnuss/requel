@@ -1,7 +1,8 @@
-import { Schema } from '../src/schema'
-import { Parser } from '../src/parser'
+import { Schema } from '../src/schema.js'
+import { Parser } from '../src/parser.js'
+import type { Options } from '../src/ast.js'
 
-const options = {
+const options: Options = {
   dialect: 'postgresql'
 }
 
@@ -230,4 +231,11 @@ delete from products where price=:price and id=:id`)
       })
     })
   })
+})
+
+test('unknown error', () => {
+  const parser = new Parser({}, options)
+
+  expect(() => parser.parse(''))
+    .toThrowError('Unknown statement')
 })

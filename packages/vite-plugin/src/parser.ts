@@ -27,6 +27,12 @@ export class UnknownRelationError extends Error {
   }
 }
 
+export class UnknownStatementError extends Error {
+  constructor() {
+    super('Unknown statement')
+  }
+}
+
 export class Parser {
   schema: Schema
   options: Options
@@ -69,6 +75,8 @@ export class Parser {
         outputs: []
       }
     }
+
+    throw new UnknownStatementError()
   }
 
   #requireRelation(relation: string) {

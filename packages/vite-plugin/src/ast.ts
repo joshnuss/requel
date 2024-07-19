@@ -34,6 +34,9 @@ export const ast = (sql: string, options: Options) : Statement[] => {
     ...options
   })
 
+  if (cst.statements.length == 1 && cst.statements[0].type == 'empty')
+    return []
+
   return cst.statements.map((statement): Statement => {
     if (statement.type == 'select_stmt') {
       return selectAst(statement)
