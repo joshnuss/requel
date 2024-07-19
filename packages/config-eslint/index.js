@@ -4,6 +4,7 @@ module.exports = {
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:svelte/recommended',
+    'plugin:vitest-globals/recommended',
     'prettier',
     'turbo'
   ],
@@ -17,7 +18,8 @@ module.exports = {
   env: {
     browser: true,
     es2017: true,
-    node: true
+    node: true,
+    "vitest-globals/env": true
   },
   overrides: [
     {
